@@ -1,32 +1,42 @@
+
 'use strict';
 
-const ConvertHandler = require('../controllers/convertHandler.js');
+var expect = require('chai').expect;
+var ConvertHandler = require('../controllers/convertHandler.js');
 
 module.exports = function (app) {
-
-  const convertHandler = new ConvertHandler();
+  
+  var convertHandler = new ConvertHandler();
 
   app.route('/api/convert')
-    .get(function (req, res) {
-      const input = req.query.input;
-
-      const initNum = convertHandler.getNum(input);
-      const initUnit = convertHandler.getUnit(input);
-
-      if (!initNum && !initUnit) return res.json('invalid number and unit');
-      if (!initNum) return res.json('invalid number');
-      if (!initUnit) return res.json('invalid unit');
-
-      const returnNum = convertHandler.convert(initNum, initUnit);
-      const returnUnit = convertHandler.getReturnUnit(initUnit);
-      const toString = convertHandler.getString(initNum, initUnit, returnNum, returnUnit);
-
-      res.json({
-        initNum,
-        initUnit,
-        returnNum,
-        returnUnit,
-        string: toString
-      });
+    .get(function (req, res){
+      var input = req.query.input;
+      var initNum = convertHandler.getNum(input);
+      var initUnit = convertHandler.getUnit(input);
+      var returnNum = convertHandler.convert(initNum, initUnit);
+      var returnUnit = convertHandler.getReturnUnit(initUnit);
+      var toString = convertHandler.getString(initNum, initUnit, returnNum, returnUnit);
+      
+      if(initNum === 'invalid number' && initUnit === 'invalid unit'){
+        res.json('invalid number and unit')
+      }
+    
+      if(initNum === 'invalid number'){
+        res.json('invalid number')
+      }  
+    
+      if(initUnit === 'invalid unit'){
+        res.json('invalid unit')
+      }  
+    
+      let responseObject = {}
+      responseObject['initNum'] = initNum
+      responseObject['initUnit'] = initUnit
+      responseObject['returnNum'] = returnNum
+      responseObject['returnUnit'] = returnUnit
+      responseObject['string'] = toString
+    
+      res.json(responseObject)
     });
+    
 };

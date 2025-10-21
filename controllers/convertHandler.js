@@ -1,93 +1,146 @@
+
+let inputRegex = /[a-z]+|[^a-z]+/gi
+
 function ConvertHandler() {
-
-  // Đọc phần số trong input
-  this.getNum = function (input) {
-    const result = input.match(/^[\d/.]+/); // lấy chuỗi số hoặc phân số ở đầu
-    if (!result) return 1; // nếu không có số thì mặc định là 1
-
-    const numStr = result[0];
-
-    // Kiểm tra nếu có hơn 1 dấu "/"
-    if ((numStr.match(/\//g) || []).length > 1) {
-      return undefined;
+  
+  this.getNum = function(input) {
+    var result;
+    
+    result = input.match(inputRegex)[0]
+    
+    let numberRegex = /\d/
+    
+    if(numberRegex.test(result) === false){
+      result = 1
+    }
+    
+    if(result.toString().includes('/')){
+      let values = result.toString().split('/')
+      if(values.length != 2){
+        return 'invalid number'
+      }
+      values[0] = parseFloat(values[0])
+      values[1] = parseFloat(values[1])
+      result = parseFloat((values[0]/values[1]).toFixed(5)) 
     }
 
-    let num;
-    if (numStr.includes('/')) {
-      const [n, d] = numStr.split('/');
-      num = parseFloat(n) / parseFloat(d);
-    } else {
-      num = parseFloat(numStr);
+    if(isNaN(result)){
+      return 'invalid number'
     }
-
-    if (isNaN(num)) return undefined;
-    return num;
+    
+    return result;
+  };
+  
+  this.getUnit = function(input) {
+    var result;
+    
+    result = input.match(inputRegex)[1]
+    
+    if(!result){
+      result = input.match(inputRegex)[0]
+    }
+    
+    let validUnits = ['gal','l','mi','km','lbs','kg','GAL','L','MI','KM','LBS','KG']
+    
+    if(!validUnits.includes(result)){
+      return 'invalid unit'
+    }
+    
+    return result;
+  };
+  
+  this.getReturnUnit = function(initUnit) {
+    var result;
+    
+    if(initUnit === 'gal' || initUnit === 'GAL'){
+      result = 'l'
+    }else if(initUnit === 'l' || initUnit === 'L'){
+      result = 'gal'
+    }
+    
+    if(initUnit === 'lbs' || initUnit === 'LBS'){
+      result = 'kg'
+    }else if(initUnit === 'kg' || initUnit === 'KG'){
+      result = 'lbs'
+    }
+    
+    if(initUnit === 'mi' || initUnit === 'MI'){
+      result = 'km'
+    }else if(initUnit === 'km' || initUnit === 'KM'){
+      result = 'mi'
+    }
+    
+    return result;
   };
 
-  // Đọc phần đơn vị trong input
-  this.getUnit = function (input) {
-    const result = input.match(/[a-zA-Z]+$/);
-    if (!result) return undefined;
-
-    const unit = result[0].toLowerCase();
-    const validUnits = ['gal', 'l', 'mi', 'km', 'lbs', 'kg'];
-
-    if (!validUnits.includes(unit)) return undefined;
-    return unit === 'l' ? 'L' : unit; // giữ L viết hoa
+  this.spellOutUnit = function(unit) {
+    var result;
+    
+    switch (unit) {
+      case 'gal':
+      case 'GAL':
+        result = 'gallon(s)';
+        break;
+      case 'l':
+      case 'L':
+        result = 'litre(s)';
+        break;
+      case 'lbs':
+      case 'LBs':
+        result = 'pound(s)';
+        break;
+      case 'kg':
+      case 'KG':
+        result = 'kilogram(s)';
+        break;
+      case 'mi':
+      case 'MI':
+        result = 'mile(s)';
+        break;
+      case 'km':
+      case 'KM':
+        result = 'kilometre(s)';
+        break;
+    }
+    
+    return result;
   };
-
-  // Trả về đơn vị đích sau khi đổi
-  this.getReturnUnit = function (initUnit) {
-    const unitMap = {
-      gal: 'L',
-      L: 'gal',
-      mi: 'km',
-      km: 'mi',
-      lbs: 'kg',
-      kg: 'lbs'
-    };
-    return unitMap[initUnit];
-  };
-
-  // Viết đầy đủ tên đơn vị
-  this.spellOutUnit = function (unit) {
-    const spellMap = {
-      gal: 'gallons',
-      L: 'liters',
-      mi: 'miles',
-      km: 'kilometers',
-      lbs: 'pounds',
-      kg: 'kilograms'
-    };
-    return spellMap[unit];
-  };
-
-  // Tính giá trị quy đổi
-  this.convert = function (initNum, initUnit) {
+  
+  this.convert = function(initNum, initUnit) {
     const galToL = 3.78541;
     const lbsToKg = 0.453592;
     const miToKm = 1.60934;
-    let result;
-
-    switch (initUnit) {
-      case 'gal': result = initNum * galToL; break;
-      case 'L': result = initNum / galToL; break;
-      case 'mi': result = initNum * miToKm; break;
-      case 'km': result = initNum / miToKm; break;
-      case 'lbs': result = initNum * lbsToKg; break;
-      case 'kg': result = initNum / lbsToKg; break;
+    var result;
+    
+    if(initUnit === 'gal' || initUnit === 'GAL'){
+      result = (initNum * galToL).toFixed(5)
+    }else if(initUnit === 'l' || initUnit === 'L'){
+      result = (initNum/galToL).toFixed(5)
     }
-
-    return parseFloat(result.toFixed(5));
+    
+    if(initUnit === 'lbs' || initUnit === 'LBS'){
+      result = (initNum * lbsToKg).toFixed(5)
+    }else if(initUnit === 'kg' || initUnit === 'KG'){
+      result = (initNum/lbsToKg).toFixed(5)
+    }
+    
+    if(initUnit === 'mi' || initUnit === 'MI'){
+      result = (initNum * miToKm).toFixed(5)
+    }else if(initUnit === 'km' || initUnit === 'KM'){
+      result = (initNum/miToKm).toFixed(5)
+    }
+    
+    return parseFloat(result);
   };
-
-  // Chuỗi mô tả kết quả
-  this.getString = function (initNum, initUnit, returnNum, returnUnit) {
-    const initUnitSpelled = this.spellOutUnit(initUnit);
-    const returnUnitSpelled = this.spellOutUnit(returnUnit);
-    return `${initNum} ${initUnitSpelled} converts to ${returnNum} ${returnUnitSpelled}`;
+  
+  this.getString = function(initNum, initUnit, returnNum, returnUnit) {
+    var result;
+    
+    result = initNum + ' ' + this.spellOutUnit(initUnit) + ' converts to ' +  returnNum+ ' ' + this.spellOutUnit(returnUnit)
+    
+    return result;
   };
-
+  
 }
 
 module.exports = ConvertHandler;
