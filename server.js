@@ -12,12 +12,16 @@ const runner            = require('./test-runner');
 
 let app = express();
 
+app.use(cors());
+
 app.use('/public', express.static(process.cwd() + '/public'));
 
 app.use(cors({origin: '*'})); //For FCC testing purposes only
 
 app.use(bodyParser.json());
+
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 //Index page (static HTML)
 app.route('/')
